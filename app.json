@@ -13,6 +13,7 @@
     },
     "ios": {
       "supportsTablet": false,
+      "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.leap.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Leap needs camera access to record your daily challenge.",
