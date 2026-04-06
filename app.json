@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Leap",
+    "slug": "leap",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "leap",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.leap.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Leap needs camera access to record your daily challenge.",
+        "NSMicrophoneUsageDescription": "Leap needs microphone access to record audio in your videos."
+      }
+    },
+    "android": {
+      "package": "com.leap.app",
+      "permissions": ["CAMERA", "RECORD_AUDIO"]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        { "cameraPermission": "Leap needs camera access to record your daily challenge." }
+      ],
+      [
+        "expo-notifications",
+        { "sounds": [] }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
