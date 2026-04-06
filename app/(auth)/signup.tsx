@@ -29,7 +29,6 @@ export default function Signup() {
     setLoading(true);
     try {
       await signUp(email.trim(), password, displayName.trim(), username.trim());
-      router.replace('/(app)');
     } catch (e: any) {
       Alert.alert('Signup failed', e.message);
     } finally {

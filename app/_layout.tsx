@@ -1,31 +1,36 @@
-import { useEffect } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { useAuth } from '@/hooks/useAuth';
-import { registerForPushNotifications } from '@/firebase/notifications';
+import { useEffect, useState } from 'react';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/firebase/config';
 
 export default function RootLayout() {
-  const user = useAuth();
-  const segments = useSegments();
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
   const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
-    const inAuth = segments[0] === '(auth)';
-    if (!user && !inAuth) {
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setReady(true);
+    });
+    return unsub;
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!user && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (user && inAuth) {
+    } else if (user && inAuthGroup) {
       router.replace('/(app)');
     }
-  }, [user, segments]);
+  }, [user, ready, segments]);
 
-  useEffect(() => {
-    if (user) registerForPushNotifications(user.uid);
-  }, [user?.uid]);
+  // Don't render anything until auth state is known
+  if (!ready) return null;
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(app)" />
-      <Stack.Screen name="record" options={{ presentation: 'fullScreenModal' }} />
-    </Stack>
-  );
+  return <Slot />;
 }

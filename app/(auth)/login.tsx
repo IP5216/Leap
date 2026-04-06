@@ -24,7 +24,6 @@ export default function Login() {
     setLoading(true);
     try {
       await signIn(email.trim(), password);
-      router.replace('/(app)');
     } catch (e: any) {
       Alert.alert('Login failed', e.message);
     } finally {
