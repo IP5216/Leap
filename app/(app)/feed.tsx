@@ -1,4 +1,4 @@
-import { Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFeed } from '@/hooks/useFeed';
 import { FeedGate } from '@/components/feed/FeedGate';
@@ -12,10 +12,24 @@ export default function FeedScreen() {
   if (isGated) return <FeedGate />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Today's Feed</Text>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <View style={styles.logoBox}>
+            <Text style={styles.logoLetter}>L</Text>
+            <View style={styles.logoDot} />
+          </View>
+          <View>
+            <Text style={styles.brandName}>Leap</Text>
+            <Text style={styles.brandSub}>FEED</Text>
+          </View>
+        </View>
+      </View>
+
       {loading ? (
-        <Text style={styles.muted}>Loading…</Text>
+        <View style={styles.center}>
+          <Text style={styles.muted}>Loading…</Text>
+        </View>
       ) : (
         <FlatList
           data={posts}
@@ -30,13 +44,43 @@ export default function FeedScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.black },
+  safe: { flex: 1, backgroundColor: COLORS.white },
   header: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: COLORS.white,
-    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  muted: { color: COLORS.gray[500], textAlign: 'center', marginTop: 40 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  logoBox: {
+    width: 36,
+    height: 36,
+    backgroundColor: COLORS.black,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoLetter: { color: COLORS.white, fontSize: 20, fontWeight: '900' },
+  logoDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.accent,
+  },
+  brandName: { fontSize: 15, fontWeight: '800', color: COLORS.black },
+  brandSub: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.gray[500],
+    letterSpacing: 1.5,
+  },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  muted: { color: COLORS.gray[500], fontSize: 14 },
   list: { paddingBottom: 40 },
 });

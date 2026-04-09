@@ -7,24 +7,21 @@ export function FeedGate() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safe}>
       <View style={styles.content}>
-        <Text style={styles.icon}>⚡</Text>
+        <View style={styles.lockWrap}>
+          <Text style={styles.lockIcon}>🔒</Text>
+        </View>
         <Text style={styles.title}>Take the leap to continue</Text>
         <Text style={styles.subtitle}>
-          Post today's challenge to unlock the full feed.
+          Post today's challenge to unlock the feed and{'\n'}see what everyone else is doing.
         </Text>
         <TouchableOpacity
-          style={styles.postButton}
+          style={styles.recordButton}
           onPress={() => router.push('/record')}
+          activeOpacity={0.85}
         >
-          <Text style={styles.postButtonText}>Post now</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.challengeLink}
-          onPress={() => router.push('/(app)')}
-        >
-          <Text style={styles.challengeLinkText}>See today's challenge</Text>
+          <Text style={styles.recordButtonText}>RECORD NOW</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -32,36 +29,47 @@ export function FeedGate() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.black },
+  safe: { flex: 1, backgroundColor: COLORS.white },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: 40,
   },
-  icon: { fontSize: 48, marginBottom: 16 },
+  lockWrap: {
+    width: 72,
+    height: 72,
+    backgroundColor: '#FDEEE8',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  lockIcon: { fontSize: 32 },
   title: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '900',
-    color: COLORS.white,
+    color: COLORS.black,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.gray[500],
     textAlign: 'center',
-    marginBottom: 40,
-    lineHeight: 24,
+    lineHeight: 21,
+    marginBottom: 36,
   },
-  postButton: {
-    backgroundColor: COLORS.accent,
-    borderRadius: 12,
+  recordButton: {
+    backgroundColor: COLORS.black,
+    borderRadius: 50,
     paddingVertical: 16,
-    paddingHorizontal: 48,
-    marginBottom: 16,
+    paddingHorizontal: 40,
   },
-  postButtonText: { color: COLORS.white, fontSize: 18, fontWeight: '800' },
-  challengeLink: { padding: 12 },
-  challengeLinkText: { color: COLORS.gray[500], fontSize: 14 },
+  recordButtonText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
 });

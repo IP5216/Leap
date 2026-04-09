@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/store/useAppStore';
 import { uploadVideo } from '@/firebase/storage';
 import { createPost, markPostedToday } from '@/firebase/firestore';
@@ -24,6 +25,7 @@ export function RecordingScreen({ onClose }: Props) {
   const [facing, setFacing] = useState<'front' | 'back'>('front');
   const cameraRef = useRef<CameraView>(null);
   const { user, setHasPostedToday } = useAppStore();
+  const todayChallenge = useAppStore((s) => s.todayChallenge);
 
   useEffect(() => {
     if (!cameraPermission?.granted) requestCamera();
@@ -58,7 +60,6 @@ export function RecordingScreen({ onClose }: Props) {
     const remaining = MAX_RECORDING_ATTEMPTS - newAttempts;
 
     if (remaining === 0) {
-      // Last attempt — no choice, must post
       uploadAndSubmit(uri);
       return;
     }
@@ -114,6 +115,7 @@ export function RecordingScreen({ onClose }: Props) {
   }
 
   const attemptsLeft = MAX_RECORDING_ATTEMPTS - attempts;
+  const challengeTitle = todayChallenge?.title ?? "Today's challenge";
 
   return (
     <View style={styles.container}>
@@ -143,38 +145,43 @@ export function RecordingScreen({ onClose }: Props) {
         )}
       </CameraView>
 
-      <SafeAreaView style={styles.controls} edges={['bottom']}>
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Text style={styles.closeBtnText}>✕</Text>
+      <SafeAreaView style={styles.topBar} edges={['top']}>
+        <TouchableOpacity style={styles.iconBtn} onPress={onClose}>
+          <Ionicons name="close" size={22} color={COLORS.white} />
         </TouchableOpacity>
 
+        <View style={styles.promptPill}>
+          <Text style={styles.promptText} numberOfLines={1}>{challengeTitle}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.iconBtn}
+          onPress={() => setFacing((f) => (f === 'front' ? 'back' : 'front'))}
+        >
+          <Ionicons name="camera-reverse-outline" size={22} color={COLORS.white} />
+        </TouchableOpacity>
+      </SafeAreaView>
+
+      <SafeAreaView style={styles.bottomBar} edges={['bottom']}>
+        <Text style={styles.attemptsLeft}>
+          {MAX_VIDEO_DURATION_SECONDS}S MAX · {attemptsLeft} ATTEMPT{attemptsLeft !== 1 ? 'S' : ''} LEFT
+        </Text>
+
         {stage === 'idle' && (
-          <>
-            <TouchableOpacity style={styles.recordBtn} onPress={startCountdown}>
-              <View style={styles.recordBtnCore} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.flipBtn}
-              onPress={() => setFacing((f) => (f === 'front' ? 'back' : 'front'))}
-            >
-              <Text style={styles.flipBtnText}>flip</Text>
-            </TouchableOpacity>
-          </>
+          <TouchableOpacity style={styles.recordBtn} onPress={startCountdown} activeOpacity={0.8}>
+            <View style={styles.recordBtnInner} />
+          </TouchableOpacity>
         )}
 
         {stage === 'recording' && (
-          <>
-            <View style={styles.spacer} />
-            <TouchableOpacity style={styles.stopBtn} onPress={stopRecording}>
-              <View style={styles.stopBtnCore} />
-            </TouchableOpacity>
-            <View style={styles.spacer} />
-          </>
+          <TouchableOpacity style={styles.recordBtn} onPress={stopRecording} activeOpacity={0.8}>
+            <View style={styles.stopBtnInner} />
+          </TouchableOpacity>
         )}
 
-        <Text style={styles.attemptsLeft}>
-          {attemptsLeft} attempt{attemptsLeft !== 1 ? 's' : ''} left
-        </Text>
+        {stage === 'idle' && (
+          <Text style={styles.tapLabel}>TAP TO RECORD</Text>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -199,20 +206,97 @@ const styles = StyleSheet.create({
   },
   permissionButton: {
     backgroundColor: COLORS.accent,
-    borderRadius: 8,
+    borderRadius: 30,
     padding: 16,
     alignItems: 'center',
     width: '100%',
   },
-  permissionButtonText: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
+  permissionButtonText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
+  topBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    gap: 12,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  promptPill: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  promptText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingBottom: 16,
+  },
+  attemptsLeft: {
+    color: COLORS.gray[300],
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginBottom: 16,
+  },
+  recordBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  recordBtnInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.accent,
+  },
+  stopBtnInner: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: COLORS.accent,
+  },
+  tapLabel: {
+    color: COLORS.gray[300],
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+  },
   recIndicator: {
     position: 'absolute',
-    top: 60,
+    top: 80,
     left: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
@@ -231,69 +315,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   overlayText: { color: COLORS.white, fontSize: 22, fontWeight: '700' },
-  controls: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 32,
-    paddingBottom: 8,
-  },
-  closeBtn: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  closeBtnText: { color: COLORS.white, fontSize: 22 },
-  recordBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 4,
-    borderColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  recordBtnCore: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: COLORS.accent,
-  },
-  stopBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 4,
-    borderColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stopBtnCore: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
-    backgroundColor: COLORS.accent,
-  },
-  flipBtn: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  flipBtnText: { color: COLORS.white, fontSize: 13 },
-  spacer: { width: 44 },
-  attemptsLeft: {
-    position: 'absolute',
-    top: -28,
-    left: 0,
-    right: 0,
-    textAlign: 'center',
-    color: COLORS.gray[300],
-    fontSize: 12,
-  },
 });
