@@ -1,42 +1,75 @@
 {
   "expo": {
-    "name": "Leap",
-    "slug": "leap",
+    "name": "Leap_MVP",
+    "slug": "Leap_MVP",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "leap",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false,
-      "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.leap.app",
+      "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Leap needs camera access to record your daily challenge.",
-        "NSMicrophoneUsageDescription": "Leap needs microphone access to record audio in your videos."
+        "NSMicrophoneUsageDescription": "Leap needs microphone access to record audio with your video.",
+        "NSPhotoLibraryUsageDescription": "Leap needs photo library access so you can attach a video to your challenge.",
+        "NSUserNotificationsUsageDescription": "Leap uses notifications to remind you when today’s challenge is live and before time runs out.",
+        "NSFaceIDUsageDescription": "Leap uses Face ID to protect your saved sign-in."
       }
     },
     "android": {
-      "package": "com.leap.app",
-      "permissions": ["CAMERA", "RECORD_AUDIO"]
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_MEDIA_VIDEO",
+        "READ_EXTERNAL_STORAGE"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-camera",
-        { "cameraPermission": "Leap needs camera access to record your daily challenge." }
-      ],
       [
         "expo-notifications",
-        { "sounds": [] }
-      ]
+        {
+          "sounds": []
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Leap uses Face ID to protect your saved sign-in."
+        }
+      ],
+      "expo-apple-authentication",
+      "expo-web-browser"
     ],
-    "experiments": {
-      "typedRoutes": true
+    "extra": {
+      "firebase": {
+        "apiKey": "AIzaSyCw4_L2aawbQKIhTQ5jBppwDBeK76U5Yxk",
+        "authDomain": "leap-e4cce.firebaseapp.com",
+        "projectId": "leap-e4cce",
+        "storageBucket": "leap-e4cce.firebasestorage.app",
+        "messagingSenderId": "1047286135542",
+        "appId": "1:1047286135542:web:d5a184e16b3f9ee8b20ad7"
+      },
+      "adminUids": [],
+      "googleAuth": {
+        "webClientId": "",
+        "iosClientId": "",
+        "androidClientId": ""
+      }
     }
   }
 }

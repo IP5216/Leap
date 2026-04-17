@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    function videoDoc(videoId) {
+      return get(/databases/$(database)/documents/videos/$(videoId)).data;
+    }
+
+    function canReadVideoDoc(videoId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/videos/$(videoId))
+        && (
+          videoDoc(videoId).moderationStatus == 'approved'
+          || videoDoc(videoId).uid == request.auth.uid
+        );
+    }
+
+    // Daily post is unique per user per challenge day (doc id `${uid}_${challengeDate}`).
+    match /videos/{videoId} {
+      allow read: if signedIn()
+        && (
+          resource.data.moderationStatus == 'approved'
+          || resource.data.uid == request.auth.uid
+        );
+
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && (
+          request.resource.data.moderationStatus == 'pending'
+          || request.resource.data.moderationStatus == 'approved'
+        );
+
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+
+      match /likes/{likerId} {
+        allow read: if canReadVideoDoc(videoId);
+        allow create: if canReadVideoDoc(videoId) && signedIn() && request.auth.uid == likerId;
+        allow delete: if signedIn()
+          && (
+            request.auth.uid == likerId
+            || (
+              exists(/databases/$(database)/documents/videos/$(videoId))
+              && get(/databases/$(database)/documents/videos/$(videoId)).data.uid == request.auth.uid
+            )
+          );
+        allow update: if false;
+      }
+
+      match /comments/{commentId} {
+        allow read: if canReadVideoDoc(videoId);
+        allow create: if canReadVideoDoc(videoId)
+          && signedIn()
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.username is string
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() < 500;
+        allow delete: if signedIn()
+          && exists(/databases/$(database)/documents/videos/$(videoId))
+          && (
+            get(/databases/$(database)/documents/videos/$(videoId)).data.uid == request.auth.uid
+            || resource.data.uid == request.auth.uid
+          );
+        allow update: if false;
+      }
+    }
+
+    // Attempt ledger for enforcing max tries + coordinating with unique video doc id.
+    match /postAttempts/{attemptId} {
+      allow read: if signedIn() && attemptId.matches('^' + request.auth.uid + '_.+');
+      allow create, update: if signedIn() && attemptId.matches('^' + request.auth.uid + '_.+');
+      allow delete: if signedIn() && attemptId.matches('^' + request.auth.uid + '_.+');
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    match /challenges/{id} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+  }
+}
