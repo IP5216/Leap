@@ -57,12 +57,12 @@
     ],
     "extra": {
       "firebase": {
-        "apiKey": "AIzaSyCw4_L2aawbQKIhTQ5jBppwDBeK76U5Yxk",
-        "authDomain": "leap-e4cce.firebaseapp.com",
-        "projectId": "leap-e4cce",
-        "storageBucket": "leap-e4cce.firebasestorage.app",
-        "messagingSenderId": "1047286135542",
-        "appId": "1:1047286135542:web:d5a184e16b3f9ee8b20ad7"
+        "apiKey": ,
+        "authDomain": 
+        "projectId": 
+        "storageBucket": 
+        "messagingSenderId":
+        "appId": 
       },
       "adminUids": [],
       "googleAuth": {
